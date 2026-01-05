@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahitya Bridge - AI Translation Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDF6E3; /* Parchment background */
+            background-image: url('https://www.transparenttextures.com/patterns/rice-paper.png');
+            color: #4A2E2C; /* Deep brown text */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lora', serif;
+            color: #4A2E2C;
+        }
+        /* Styles for scroll animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.6s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Styles for Modal */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .drop-zone {
+            border: 3px dashed #FF9933;
+            transition: background-color 0.3s;
+        }
+        .drop-zone.drag-over {
+            background-color: #fbf0d9;
+        }
+        
+        /* -- MODIFIED & NEW STYLES -- */
+
+        /* Styles for Typewriter Cursor */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background-color: #4A2E2C;
+            animation: blink 0.7s infinite;
+            margin-left: 4px;
+            vertical-align: bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* 1. Animated Gradient Border & 3D Tilt Styles for Feature Cards */
+        .feature-card {
+            position: relative;
+            border-top: 4px solid transparent; 
+            transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+            overflow: hidden; 
+            background-clip: padding-box;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #FF9933, #990000, transparent);
+            transition: left 0.5s ease;
+        }
+        .feature-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .feature-card:hover::before {
+            left: 100%;
+        }
+        
+        /* 2. Dynamic Navbar on Scroll Styles - Color property removed to keep it dark */
+        #navbar.scrolled {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        #navbar nav a, #navbar nav button {
+            transition: font-size 0.3s ease, transform 0.3s ease;
+        }
+        #navbar.scrolled .nav-link {
+            font-size: 1rem; /* Adjust font size on scroll */
+        }
+        #navbar.scrolled .action-button {
+            transform: scale(0.9);
+        }
+
+        /* 4. Animated Process Timeline Styles */
+        #process-timeline > div {
+            transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .process-step {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .process-step:nth-child(1) { transition-delay: 0.2s; }
+        .process-step:nth-child(2) { transition-delay: 0.4s; }
+        .process-step:nth-child(3) { transition-delay: 0.6s; }
+        .process-step:nth-child(4) { transition-delay: 0.8s; }
+        #process.visible #process-timeline > div {
+            width: 100%;
+        }
+        #process.visible .process-step {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+
+</head>
+<body class="text-gray-800">
+
+    <div id="app-container">
+        
+        <header id="navbar" class="bg-[#4A2E2C] fixed top-0 left-0 right-0 z-40 shadow-md transition-all duration-300">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold text-[#FDF6E3]">
+                    Sahitya <span class="text-[#FF9933]">Bridge</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Features</a>
+                    <a href="#process" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Process</a>
+                    <a href="#demo" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Demo</a>
+                    <a href="#impact" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Impact</a>
+                    <a href="#tech" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Technology</a>
+                    <a href="login.html" class="nav-link font-serif text-[#FDF6E3] hover:text-[#FF9933]">Log In</a>
+                    <a href="signup.html" class="bg-[#FF9933] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow hover:shadow-lg">Sign Up for Free</a>
+                </div>
+            </nav>
+        </header>
+        <main id="page-landing">
+            <section class="bg-[#FDF6E3] pt-32 pb-20">
+                <div class="container mx-auto px-6">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
+                        <div class="hidden md:block reveal">
+                            <img src="images/nepali-art.png" alt="Traditional Nepali Art" class="rounded-lg shadow-xl transform rotate-[-3deg]">
+                        </div>
+
+                        <div class="text-center md:col-span-3">
+                            <h1 id="typewriter-h1" class="text-4xl md:text-6xl font-bold mb-4 h-24 md:h-32"></h1>
+                            <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-8">AI-powered translation to bring Nepalese and Sinhalese literature to the world. Digitize, translate, and preserve cultural texts in minutes, not months.</p>
+                            <button id="start-translating-btn" class="action-button bg-[#FF9933] text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-opacity-90 transition-transform hover:scale-105 shadow-lg">Start Translating Now</button>
+                        </div>
+
+                        <div class="hidden md:block reveal">
+                            <img src="images/sinhalese-mask.png" alt="Traditional Sinhalese Art" class="rounded-lg shadow-xl transform rotate-[3deg]">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="py-20 bg-[#fbf0d9] reveal">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-12">An End-to-End Solution for Literary Preservation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <a href="multiformat_ingestion.html" class="block bg-white p-8 rounded-lg shadow-md text-center feature-card">
+                             <svg class="w-16 h-16 mx-auto mb-4 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            <h3 class="text-xl font-bold mb-2">Multi-Format Ingestion</h3>
+                            <p class="text-gray-600">Effortlessly process documents in various formats like PDF, JPG, and PNG.</p>
+                        </a>
+                        <a href="text_recognition.html" class="block bg-white p-8 rounded-lg shadow-md text-center feature-card">
+                             <svg class="w-16 h-16 mx-auto mb-4 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <h3 class="text-xl font-bold mb-2">Intelligent Text Recognition</h3>
+                            <p class="text-gray-600">Our specialized OCR is fine-tuned for Nepali and Sinhalese scripts to ensure high accuracy.</p>
+                        </a>
+                        <a href="ai_translation.html" class="block bg-white p-8 rounded-lg shadow-md text-center feature-card">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            <h3 class="text-xl font-bold mb-2">Automated AI Translation</h3>
+                            <p class="text-gray-600">Fine-tuned neural models provide fluent English translations that capture literary nuance.</p>
+                        </a>
+                        <a href="dualpaneeditor.html" class="block bg-white p-8 rounded-lg shadow-md text-center feature-card">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 000-2 2"></path></svg>
+                            <h3 class="text-xl font-bold mb-2">Dual-Pane Editor</h3>
+                            <p class="text-gray-600">Review, edit, and verify translations side-by-side with the original source image.</p>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="process" class="py-20 bg-[#FDF6E3] reveal">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-12">Our Simple Four-Step Process</h2>
+                    <div class="relative max-w-5xl mx-auto">
+                        <div id="process-timeline" class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-[#FF9933]/30 -translate-y-1/2">
+                            <div class="h-full bg-[#FF9933] w-0"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center relative">
+                            <div class="process-step bg-white p-6 rounded-lg shadow-lg">
+                                <div class="bg-[#FF9933] text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+                                <h3 class="font-bold text-lg mb-2">Upload</h3>
+                                <p class="text-sm text-gray-600">Begin by uploading your scanned document or PDF file.</p>
+                            </div>
+                            <div class="process-step bg-white p-6 rounded-lg shadow-lg">
+                                <div class="bg-[#FF9933] text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+                                <h3 class="font-bold text-lg mb-2">AI Processing</h3>
+                                <p class="text-sm text-gray-600">Our AI performs OCR and translates the text into English.</p>
+                            </div>
+                            <div class="process-step bg-white p-6 rounded-lg shadow-lg">
+                                <div class="bg-[#FF9933] text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+                                <h3 class="font-bold text-lg mb-2">Review & Edit</h3>
+                                <p class="text-sm text-gray-600">Use the dual-pane editor to refine and perfect the translation.</p>
+                            </div>
+                            <div class="process-step bg-white p-6 rounded-lg shadow-lg">
+                                <div class="bg-[#FF9933] text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
+                                <h3 class="font-bold text-lg mb-2">Export</h3>
+                                <p class="text-sm text-gray-600">Download your final work as a searchable PDF, DOCX, or text file.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="demo" class="py-20 bg-[#fbf0d9] reveal">
+                <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-3xl font-bold mb-4">See It in Action</h2>
+                    <p class="text-lg text-gray-700 max-w-2xl mx-auto mb-12">Experience the clarity of our AI translation. Drag the slider below to compare the original script with its English translation.</p>
+
+                    <div id="comparison-slider" class="relative max-w-4xl mx-auto rounded-lg shadow-2xl overflow-hidden cursor-ew-resize group max-h-[500px]">
+                        <div class="w-full h-full">
+                            <img src="images/sinhalese-translated.png" alt="Translated English Text" class="block w-full h-full object-cover max-w-none pointer-events-none">
+                            <span class="absolute top-4 left-4 bg-[#FF9933] text-white px-3 py-1 text-sm font-bold rounded-md">ENGLISH</span>
+                        </div>
+                        
+                        <div id="original-image-container" class="absolute top-0 left-0 h-full w-1/2 overflow-hidden pointer-events-none">
+                            <img src="images/sinhalese-original.png" alt="Original Sinhalese Script" class="block w-full h-full object-cover max-w-none pointer-events-none">
+                            <span class="absolute top-4 left-4 bg-[#4A2E2C] text-white px-3 py-1 text-sm font-bold rounded-md">SINHALESE</span>
+                        </div>
+
+                        <div id="slider-handle" class="absolute top-0 left-1/2 h-full w-2 bg-white/50 backdrop-blur-sm transform -translate-x-1/2 cursor-ew-resize group-hover:bg-white transition-colors">
+                            <div class="absolute top-1/2 left-1/2 w-10 h-10 bg-white rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="impact" class="py-20 bg-[#FDF6E3] reveal">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-12">Creating a Global Impact</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="bg-[#fbf0d9] p-6 rounded-lg border-l-4 border-[#FF9933]">
+                            <h3 class="text-xl font-bold mb-3">Social & Cultural Impact</h3>
+                            <p class="text-gray-700">Preserves and shares literary heritage globally, fostering cross-cultural understanding and ensuring valuable texts are not lost to time.</p>
+                        </div>
+                        <div class="bg-[#fbf0d9] p-6 rounded-lg border-l-4 border-[#FF9933]">
+                            <h3 class="text-xl font-bold mb-3">Economic Opportunities</h3>
+                            <p class="text-gray-700">Creates new market possibilities for authors and publishers by making their works accessible to the vast English-speaking world.</p>
+                        </div>
+                        <div class="bg-[#fbf0d9] p-6 rounded-lg border-l-4 border-[#FF9933]">
+                            <h3 class="text-xl font-bold mb-3">Academic & Research Impact</h3>
+                            <p class="text-gray-700">Unlocks new educational and research avenues by providing scholars with access to a rich repository of previously untranslated works.</p>
+                        </div>
+                        <div class="bg-[#fbf0d9] p-6 rounded-lg border-l-4 border-[#FF9933]">
+                            <h3 class="text-xl font-bold mb-3">Technological Advancement</h3>
+                            <p class="text-gray-700">Advances AI and OCR technology for under-resourced languages, contributing to the broader field of natural language processing.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="stats" class="py-20 bg-[#fbf0d9] reveal">
+                <div class="container mx-auto px-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto">
+                        <div>
+                            <h3 class="text-5xl font-bold text-[#FF9933] mb-2" data-target="10000">0</h3>
+                            <p class="text-lg font-semibold text-[#4A2E2C]">Pages Translated</p>
+                            <p class="text-gray-600">Making thousands of pages of history accessible.</p>
+                        </div>
+                        <div>
+                            <h3 class="text-5xl font-bold text-[#FF9933] mb-2" data-target="2">0</h3>
+                            <p class="text-lg font-semibold text-[#4A2E2C]">Languages Supported</p>
+                            <p class="text-gray-600">Specialized models for Nepali and Sinhalese scripts.</p>
+                        </div>
+                         <div>
+                            <h3 class="text-5xl font-bold text-[#FF9933] mb-2" data-target="95">0</h3>
+                            <p class="text-lg font-semibold text-[#4A2E2C]">Accuracy Rate (%)</p>
+                            <p class="text-gray-600">Fine-tuned OCR for near-perfect text recognition.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="tech" class="py-20 bg-[#FDF6E3] reveal">
+                 <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-3xl font-bold mb-4">Built on Powerful Technology</h2>
+                    <p class="text-lg text-gray-700 max-w-2xl mx-auto mb-12">We use a state-of-the-art tech stack to deliver reliable, scalable, and highly accurate translations.</p>
+                    <div class="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">Python</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">Django REST</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">React.js</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">PyTorch</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">Hugging Face</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">Tesseract OCR</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">PostgreSQL</span>
+                        <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">Docker</span>
+                         <span class="bg-white text-gray-800 text-sm font-medium px-4 py-2 rounded-full shadow-sm transition-transform hover:scale-110">AWS</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-[#fbf0d9] py-20 reveal">
+                 <div class="container mx-auto px-6 text-center">
+                    <h2 class="text-3xl font-bold mb-4">Ready to Bridge Cultures?</h2>
+                    <p class="text-lg text-gray-700 max-w-2xl mx-auto mb-8">Join us in our mission to preserve and share the world's literary heritage. Create a free account and start your first translation project today.</p>
+                    <a href="signup.html" class="inline-block bg-[#FF9933] text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-opacity-90 transition-transform hover:scale-105 shadow-lg">Sign Up for Free</a>
+                </div>
+            </section>
+            
+            <footer class="bg-[#4A2E2C] text-white">
+                <div class="container mx-auto px-6 py-8 text-center">
+                    <p>&copy; 2025 Sahitya Bridge. A project by The Hacksmiths_01 for Smart India Hackathon.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <div id="upload-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="modal-content bg-[#FDF6E3] w-full max-w-lg p-8 rounded-lg shadow-2xl transform scale-95">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Start Your Translation Project</h2>
+                <button id="close-modal-btn" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            
+            <div id="upload-ui">
+                <p class="text-gray-700 mb-4">Select a document to begin the automated OCR and translation process.</p>
+                <div id="drop-zone" class="drop-zone p-10 text-center rounded-lg cursor-pointer">
+                    <input type="file" id="file-input" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    <p class="mt-4 text-gray-600 font-semibold">Drag & Drop Your File Here</p>
+                    <p class="text-sm text-gray-500 mt-2">or</p>
+                    <label for="file-input" class="mt-4 inline-block bg-[#FF9933] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow cursor-pointer">Select File</label>
+                </div>
+                <div class="mt-2 text-center">
+                    <p class="text-sm text-gray-500">Supported Formats: PDF, JPG, PNG</p>
+                </div>
+            </div>
+
+            <div id="progress-ui" class="hidden">
+                 <p class="text-center font-semibold mb-2" id="progress-text">Uploading file...</p>
+                 <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-[#FF9933] h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+             <div id="result-ui" class="hidden text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-green-700" id="result-title">Upload Successful!</h3>
+                <p class="text-gray-700 mt-2" id="result-message"></p>
+                <button id="start-new-upload-btn" class="mt-6 bg-[#4A2E2C] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow">Translate Another Document</button>
+             </div>
+        </div>
+    </div>
+
+<!-- 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MODAL AND UPLOAD LOGIC ---
+            const modal = document.getElementById('upload-modal');
+            const modalOverlay = document.querySelector('.modal-overlay');
+            const modalContent = document.querySelector('.modal-content');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const actionButtons = document.querySelectorAll('.action-button');
+
+            const uploadUi = document.getElementById('upload-ui');
+            const progressUi = document.getElementById('progress-ui');
+            const resultUi = document.getElementById('result-ui');
+            const startNewUploadBtn = document.getElementById('start-new-upload-btn');
+
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            const resultIconContainer = resultUi.querySelector('div');
+
+            const openModal = () => {
+                resetModal();
+                modal.classList.remove('pointer-events-none', 'opacity-0');
+                modalContent.classList.remove('scale-95');
+            };
+
+            const closeModal = () => {
+                modal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('pointer-events-none'), 300);
+            };
+
+            actionButtons.forEach(btn => btn.addEventListener('click', openModal));
+            closeModalBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+            startNewUploadBtn.addEventListener('click', resetModal);
+
+            function resetModal() {
+                uploadUi.classList.remove('hidden');
+                progressUi.classList.add('hidden');
+                resultUi.classList.add('hidden');
+                fileInput.value = '';
+            }
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) handleFileUpload(files[0]);
+            });
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) handleFileUpload(fileInput.files[0]);
+            });
+
+            async function handleFileUpload(file) {
+                uploadUi.classList.add('hidden');
+                progressUi.classList.remove('hidden');
+                progressText.textContent = `Uploading "${file.name}"...`;
+                progressBar.style.width = '0%';
+
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        progressText.textContent = 'Processing...';
+                        setTimeout(() => {
+                            showResult('success', 'Upload Successful!', 'Your document is ready for translation. Redirecting to editor...');
+                        }, 1000);
+                    }
+                }, 100);
+            }
+
+            function showResult(type, title, message) {
+                progressUi.classList.add('hidden');
+                resultUi.classList.remove('hidden');
+                resultTitle.textContent = title;
+                resultMessage.textContent = message;
+                
+                if (type === 'success') {
+                    resultTitle.classList.remove('text-red-700');
+                    resultTitle.classList.add('text-green-700');
+                    resultIconContainer.classList.remove('bg-red-100');
+                    resultIconContainer.classList.add('bg-green-100');
+                    resultIconContainer.innerHTML = `<svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                } else {
+                    resultTitle.classList.remove('text-green-700');
+                    resultTitle.classList.add('text-red-700');
+                    resultIconContainer.classList.remove('bg-green-100');
+                    resultIconContainer.classList.add('bg-red-100');
+                    resultIconContainer.innerHTML = `<svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+                }
+            }
+            
+            // --- SCROLL ANIMATION LOGIC ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        if (entry.target.id === 'stats') {
+                            const counters = entry.target.querySelectorAll('h3[data-target]');
+                            counters.forEach(counter => animateCounter(counter));
+                            observer.unobserve(entry.target);
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            const elementsToReveal = document.querySelectorAll('.reveal');
+            elementsToReveal.forEach(el => observer.observe(el));
+
+            // --- TYPEWRITER EFFECT LOGIC ---
+            const h1Element = document.getElementById('typewriter-h1');
+            if (h1Element) {
+                const textToType = "Unlock Literary Heritage";
+                let index = 0;
+                h1Element.innerHTML = '<span class="typewriter-cursor"></span>';
+                const cursor = h1Element.querySelector('.typewriter-cursor');
+
+                function type() {
+                    if (index < textToType.length) {
+                        h1Element.insertBefore(document.createTextNode(textToType.charAt(index)), cursor);
+                        index++;
+                        setTimeout(type, 100);
+                    }
+                }
+                setTimeout(type, 500);
+            }
+
+            // --- COMPARISON SLIDER LOGIC ---
+            const slider = document.getElementById('comparison-slider');
+            if (slider) {
+                const handle = document.getElementById('slider-handle');
+                const originalImageContainer = document.getElementById('original-image-container');
+                let isDragging = false;
+
+                const moveSlider = (clientX) => {
+                    const rect = slider.getBoundingClientRect();
+                    let offsetX = clientX - rect.left;
+                    offsetX = Math.max(0, Math.min(offsetX, rect.width));
+                    originalImageContainer.style.width = `${offsetX}px`;
+                    handle.style.left = `${offsetX}px`;
+                };
+
+                setTimeout(() => {
+                    const initialWidth = slider.offsetWidth / 2;
+                    originalImageContainer.style.width = `${initialWidth}px`;
+                    handle.style.left = `${initialWidth}px`;
+                }, 100);
+
+                slider.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    e.preventDefault();
+                });
+                window.addEventListener('mouseup', () => { isDragging = false; });
+                window.addEventListener('mousemove', (e) => { if (isDragging) moveSlider(e.clientX); });
+                slider.addEventListener('touchstart', (e) => { isDragging = true; }, { passive: true });
+                window.addEventListener('touchend', () => { isDragging = false; });
+                window.addEventListener('touchmove', (e) => { if (isDragging && e.touches[0]) moveSlider(e.touches[0].clientX); }, { passive: true });
+            }
+
+            // --- ANIMATED COUNTER LOGIC ---
+            function animateCounter(counter) {
+                const target = +counter.getAttribute('data-target');
+                const duration = 2000;
+                let start = 0;
+                const step = (timestamp) => {
+                    if (!start) start = timestamp;
+                    const progress = Math.min((timestamp - start) / duration, 1);
+                    counter.innerText = Math.floor(progress * target).toLocaleString();
+                    if (progress < 1) window.requestAnimationFrame(step);
+                };
+                window.requestAnimationFrame(step);
+            }
+
+            // --- NAVBAR SCROLL LOGIC ---
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // --- 3D TILT EFFECT FOR CARDS ---
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -8;
+                    const rotateY = ((x - centerX) / centerX) * 8;
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+
+        });
+    </script> -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- ALL YOUR EXISTING ANIMATION & UI LOGIC (UNCHANGED) ---
+        const observer=new IntersectionObserver((e)=>{e.forEach(e=>{e.isIntersecting&&(e.target.classList.add("visible"),"stats"===e.target.id&&(e.target.querySelectorAll("h3[data-target]").forEach(e=>animateCounter(e)),observer.unobserve(e.target)))})},{threshold:.1});document.querySelectorAll(".reveal").forEach(e=>observer.observe(e));const h1Element=document.getElementById("typewriter-h1");if(h1Element){const e="Unlock Literary Heritage";let t=0;h1Element.innerHTML='<span class="typewriter-cursor"></span>';const o=h1Element.querySelector(".typewriter-cursor");function n(){t<e.length&&(h1Element.insertBefore(document.createTextNode(e.charAt(t)),o),t++,setTimeout(n,100))}setTimeout(n,500)}const slider=document.getElementById("comparison-slider");if(slider){const e=document.getElementById("slider-handle"),t=document.getElementById("original-image-container");let o=!1;const n=l=>{const s=slider.getBoundingClientRect();let r=l-s.left;r=Math.max(0,Math.min(r,s.width)),t.style.width=`${r}px`,e.style.left=`${r}px`};setTimeout(()=>{const l=slider.offsetWidth/2;t.style.width=`${l}px`,e.style.left=`${l}px`},100),slider.addEventListener("mousedown",e=>{o=!0,e.preventDefault()}),window.addEventListener("mouseup",()=>o=!1),window.addEventListener("mousemove",e=>{o&&n(e.clientX)}),slider.addEventListener("touchstart",()=>o=!0,{passive:!0}),window.addEventListener("touchend",()=>o=!1),window.addEventListener("touchmove",e=>{o&&e.touches[0]&&n(e.touches[0].clientX)},{passive:!0})}function animateCounter(e){const t=+e.getAttribute("data-target"),o=2e3;let n=0;const l=s=>{n||(n=s);const r=Math.min((s-n)/o,1);e.innerText=Math.floor(r*t).toLocaleString(),r<1&&window.requestAnimationFrame(l)};window.requestAnimationFrame(l)}const navbar=document.getElementById("navbar");window.addEventListener("scroll",()=>{window.scrollY>50?navbar.classList.add("scrolled"):navbar.classList.remove("scrolled")});const featureCards=document.querySelectorAll(".feature-card");featureCards.forEach(e=>{e.addEventListener("mousemove",t=>{const o=e.getBoundingClientRect(),n=t.clientX-o.left,l=t.clientY-o.top,s=o.width/2,r=o.height/2,a=(l-r)/r*-8,c=(n-s)/s*8;e.style.transform=`perspective(1000px) rotateX(${a}deg) rotateY(${c}deg) scale3d(1.05, 1.05, 1.05)`}),e.addEventListener("mouseleave",()=>{e.style.transform="perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)"})});
+        
+        // --- ROBUST MODAL/UPLOAD LOGIC ---
+        const modal = document.getElementById('upload-modal');
+        const actionButtons = document.querySelectorAll('.action-button, #start-translating-btn');
+        const uploadUi = document.getElementById('upload-ui');
+        const progressUi = document.getElementById('progress-ui');
+        const resultUi = document.getElementById('result-ui');
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        const openModal = () => { resetModal(); modal.classList.remove('pointer-events-none', 'opacity-0'); };
+        const closeModal = () => { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('pointer-events-none'), 300); };
+        actionButtons.forEach(btn => btn.addEventListener('click', openModal));
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        document.getElementById('start-new-upload-btn').addEventListener('click', resetModal);
+        
+        function resetModal() { uploadUi.classList.remove('hidden'); progressUi.classList.add('hidden'); resultUi.classList.add('hidden'); fileInput.value = ''; }
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFileUpload(fileInput.files[0]); });
+
+        // Function to convert a file to a Base64 string
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        async function handleFileUpload(file) {
+            uploadUi.classList.add('hidden');
+            progressUi.classList.remove('hidden');
+            document.getElementById('progress-text').textContent = 'Processing document on server...';
+            document.getElementById('progress-bar').style.width = '30%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                // First, convert the image to Base64 to ensure it can be displayed later
+                const imageAsBase64 = await toBase64(file);
+
+                const response = await fetch('http://127.0.0.1:5000/process-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                document.getElementById('progress-bar').style.width = '80%';
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.error || 'Server processing failed.');
+                
+                document.getElementById('progress-bar').style.width = '100%';
+                showResult('success', 'Processing Complete!', 'Redirecting to the editor...');
+                
+                // Save the reliable Base64 string and the text data
+                sessionStorage.setItem('sourceImageBase64', imageAsBase64);
+                sessionStorage.setItem('originalText', data.originalText);
+                sessionStorage.setItem('translatedText', data.translatedText);
+                
+                setTimeout(() => { window.location.href = 'dualpaneeditor.html'; }, 1500);
+
+            } catch (error) {
+                console.error("Processing failed:", error);
+                showResult('error', 'Processing Failed', error.message);
+            }
+        }
+        
+        function showResult(type, title, message) { /* ... (this function remains the same) ... */ progressUi.classList.add('hidden'); const resultTitle=document.getElementById('result-title'); const resultMessage=document.getElementById('result-message'); const resultIconContainer=resultUi.querySelector('div'); resultUi.classList.remove('hidden');resultTitle.textContent=title;resultMessage.textContent=message;resultIconContainer.innerHTML=type==='success'?`<svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`:`<svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;resultTitle.className=type==='success'?'text-xl font-bold text-green-700':'text-xl font-bold text-red-700';resultIconContainer.className=`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${type==='success'?'bg-green-100':'bg-red-100'}`; }
+    });
+</script>
+
+</body>
+</html>
