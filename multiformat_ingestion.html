@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Format Ingestion - Sahitya Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDF6E3; /* Parchment background */
+            background-image: url('https://www.transparenttextures.com/patterns/rice-paper.png');
+            color: #4A2E2C; /* Deep brown text */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lora', serif;
+            color: #4A2E2C;
+        }
+        .drop-zone {
+            border: 3px dashed #FF9933;
+            transition: background-color 0.3s;
+        }
+        .drop-zone.drag-over {
+            background-color: #fbf0d9;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- =========== Navigation Bar =========== -->
+    <header id="navbar" class="bg-[#FDF6E3]/80 backdrop-blur-lg sticky top-0 left-0 right-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold text-[#4A2E2C]">
+                Sahitya <span class="text-[#FF9933]">Bridge</span>
+            </a>
+            <a href="index.html#features" class="bg-[#FF9933] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow hover:shadow-lg">&larr; Back to Home</a>
+        </nav>
+    </header>
+
+    <!-- =========== Main Content =========== -->
+    <main class="container mx-auto px-6 py-16">
+        <div class="max-w-4xl mx-auto text-center">
+             <svg class="w-24 h-24 mx-auto mb-6 text-[#FF9933]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Multi-Format Ingestion</h1>
+            <p class="text-lg md:text-xl text-gray-700 mb-12">Our platform is built to handle a wide range of document types, making it easy to digitize your physical or digital archives.</p>
+        </div>
+
+        <!-- Upload Simulation -->
+        <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-xl border-t-4 border-[#990000]">
+            <div id="drop-zone" class="drop-zone p-12 text-center rounded-lg cursor-pointer">
+                <p class="text-gray-600 font-semibold">Drag & Drop Your Files Here</p>
+                <p class="text-sm text-gray-500 mt-2">or</p>
+                <button class="mt-4 bg-[#FF9933] text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow">Select Files</button>
+            </div>
+            <div class="mt-6 text-center">
+                <p class="font-semibold">Supported Formats:</p>
+                <div class="flex justify-center items-center space-x-6 mt-2 text-gray-600">
+                    <span>PDF</span>
+                    <span>JPG / JPEG</span>
+                    <span>PNG</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#4A2E2C] text-white mt-20">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 Sahitya Bridge. A project by The Hacksmiths_01 for Smart India Hackathon.</p>
+        </div>
+    </footer>
+    
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            alert('File drop simulated! In a real app, the upload would begin.');
+        });
+    </script>
+</body>
+</html>
+
