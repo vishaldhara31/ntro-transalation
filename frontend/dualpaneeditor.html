@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual-Pane Editor - Sahitya Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FDF6E3; background-image: url('https://www.transparenttextures.com/patterns/rice-paper.png'); color: #4A2E2C; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Lora', serif; color: #4A2E2C; }
+        .editor-pane { height: calc(50vh - 150px); }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header id="navbar" class="bg-[#FDF6E3]/80 backdrop-blur-lg sticky top-0 left-0 right-0 z-40 shadow-sm"><nav class="container mx-auto px-6 py-4 flex justify-between items-center"><a href="index.html" class="text-2xl font-bold text-[#4A2E2C]">Sahitya <span class="text-[#FF9933]">Bridge</span></a><div class="flex items-center space-x-4"><span class="text-sm text-gray-600">Project: Sample Manuscript</span><a href="index.html" class="bg-[#FF9933] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow hover:shadow-lg">&larr; Back to Home</a></div></nav></header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="max-w-7xl mx-auto text-center mb-8">
+            <h1 class="text-4xl font-bold">Dual-Pane Editor</h1>
+            <p class="text-lg text-gray-700">Review the AI's work and refine the translation.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-lg shadow-xl border-t-4 border-[#990000]">
+                <h2 class="text-xl font-bold mb-4 text-center">Source Document Image</h2>
+                <div class="bg-gray-200 h-[calc(100vh-250px)] overflow-auto rounded-md flex items-center justify-center">
+                    <img id="source-image" src="https://placehold.co/600x800/fbf0d9/4A2E2C?text=Loading+Image..." alt="Source Document" class="max-w-full h-auto">
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-xl border-t-4 border-[#990000] flex flex-col space-y-4">
+                <div>
+                    <h2 class="text-xl font-bold mb-2 text-center">Original Extracted Text (Read-only)</h2>
+                    <textarea id="original-textarea" readonly class="w-full editor-pane p-4 border bg-gray-100 border-gray-300 rounded-md" placeholder="Loading original text..."></textarea>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold mb-2 text-center">Editable Translation</h2>
+                    <textarea id="translation-textarea" class="w-full editor-pane p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#FF9933] focus:border-transparent transition" placeholder="Loading translated text..."></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button class="bg-[#FF9933] text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-90 shadow">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sourceImage = document.getElementById('source-image');
+            const originalTextarea = document.getElementById('original-textarea');
+            const translationTextarea = document.getElementById('translation-textarea');
+
+            // Retrieve the Base64 image string and text data
+            const imageBase64 = sessionStorage.getItem('sourceImageBase64');
+            const originalText = sessionStorage.getItem('originalText');
+            const translatedText = sessionStorage.getItem('translatedText');
+
+            if (imageBase64) {
+                sourceImage.src = imageBase64;
+            } else {
+                sourceImage.alt = "Image not found."
+            }
+            
+            if (originalText) originalTextarea.value = originalText;
+            if (translatedText) translationTextarea.value = translatedText;
+        });
+    </script>
+</body>
+</html>
