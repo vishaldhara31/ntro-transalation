@@ -1,0 +1,6 @@
+Flask
+Flask-Cors
+requests
+Pillow
+pytesseract
+google-cloud-translate
