@@ -21,7 +21,7 @@ REST API–based backend
 Simple and responsive frontend interface
 
 ## 🛠️ Tech Stack
-Backend
+## Backend
 
 Python
 
@@ -33,7 +33,7 @@ Google Cloud Translation API
 
 Pillow (PIL)
 
-Frontend
+## Frontend
 
 HTML
 
@@ -41,18 +41,28 @@ CSS
 
 JavaScript
 
+
+
 ## 📂 Project Structure
 ntro-translation/
 │
+
 ├── backend/
+
 │   └── app.py
-│
+
+
 ├── frontend/
+
 │   ├── index.html
+
 │   └── multiformat_ingestion.html
 │
+
 ├── README.md
+
 └── LICENSE
+
 
 ## ⚙️ How the System Works
 
